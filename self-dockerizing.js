@@ -12,4 +12,4 @@ require('http').createServer((req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     res.end('Hello World');
     console.info(res.statusCode, req.url);
-}).listen(8080, _ => console.info(`NodeJS ${process.versions.node} running ${process.env.DOCKERIZED ? 'dockerized' : 'locally'} at http://localhost:8080/`));
+}).listen(8080, _ => console.info(`${process.env.DOCKERIZED ? 'dockerized' : 'local'} NodeJS ${process.versions.node} running at http://localhost:8080/`));
