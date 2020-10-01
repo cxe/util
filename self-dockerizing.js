@@ -1,4 +1,4 @@
-//usr/bin/env docker run -e "DOCKERIZED=dockerized" --rm --init -it -p 8080:8080 -v "$PWD":"$PWD" -w "$PWD" node:latest ${1:-node "$PWD/${0#./}"}; exit;
+//usr/bin/env docker run -e "DOCKERIZED=$( docker version --format '{{.Server.Version}}' )" --rm --init -it -p 8080:8080 -v "$PWD":"$PWD" -w "$PWD" node:latest ${1:-node "$PWD/${0#./}"}; exit;
 
 /**
  * @use:
