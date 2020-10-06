@@ -1,4 +1,4 @@
-//usr/bin/env echo "NodeJS ${NODE_VERSION:=latest}" && if [ -f "$PWD/.env" ]; then source "$PWD/.env"; fi; docker run -e "PORT=${PORT:=8080}" -e "DOCKERIZED=1" --rm --init -it -p $PORT:$PORT -v "$PWD":"$PWD" -w "$PWD" node:$NODE_VERSION $( (( $# == 0 )) && echo "node $PWD/${0#./}" || echo "$@" ); exit;
+//usr/bin/env echo "NodeJS ${NODE_VERSION:=$(if [ -f package.json ]; then awk '/node/{print $NF}' package.json | tr -d \"; else echo latest; fi)}"; if [ -f "$PWD/.env" ]; then source "$PWD/.env"; fi; docker run -e "PORT=${PORT:=8080}" -e "DOCKERIZED=1" --rm --init -it -p $PORT:$PORT -v "$PWD":"$PWD" -w "$PWD" node:$NODE_VERSION $( (( $# == 0 )) && echo "node $PWD/${0#./}" || echo "$@" ); exit;
 
 /**
  * @use:
