@@ -1,11 +1,14 @@
 //usr/bin/env echo "NodeJS ${NODE_VERSION:=$(if [ -f package.json ]; then awk '/node/{print $NF}' package.json | tr -d \"; else echo latest; fi)}"; if [ -f "$PWD/.env" ]; then source "$PWD/.env"; fi; docker run -e "PORT=${PORT:=8080}" -e "DOCKERIZED=1" --rm --init -it -p $PORT:$PORT -v "$PWD":"$PWD" -w "$PWD" node:$NODE_VERSION $( (( $# == 0 )) && echo "node $PWD/${0#./}" || echo "$@" ); exit;
 
 /**
+ * simple self-dockerizing node server
+ * + no need to install node, npm, nvm - all you need to run locally using the correct node version specified in the package.json (engines.node) is docker
+ * + runnable as a single file due to the first line being a JS comment that is bash executable
+ *
  * @use:
- *   No need to install npm or node locally - all you need is `docker` to run this dockerized node service from a single file due to the bash-js-comment at the top.
- *   Make this file runnable `chmod +x self-dockerizing.js` then you can just start it `./self-dockerizing.js` and it will run in docker under the same path.
- *   As this is an interactive docker terminal you can also proxy any other command through docker e.g. `./self-dockerizing.js bash`
- *   To run the same file locally use `node self-dockerizing.js`.
+ *   Make this file runnable `chmod +x app.js` then you can just start it using `./app.js` and it will run in docker under the same path.
+ *   As this is an interactive docker terminal you can also proxy any other command through docker e.g. `./app.js bash`
+ *   To run the same file without docker use the normal `node app.js`.
  */
 const http = require('http');
 const { PORT = 8080 } = process.env;
