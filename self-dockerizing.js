@@ -1,4 +1,4 @@
-//usr/bin/env docker run -e "DOCKERIZED=$( docker version --format '{{.Server.Version}}' )" --rm --init -it -p 8080:8080 -v "$PWD":"$PWD" -w "$PWD" node:latest ${1:-node "$PWD/${0#./}"}; exit;
+//usr/bin/env docker run -e "PORT=${PORT:=8080}" -e "DOCKERIZED=1" --rm --init -it -p $PORT:$PORT -v "$PWD":"$PWD" -w "$PWD" node:${NODE_VERSION:-latest} $( (( $# == 0 )) && echo "node $PWD/${0#./}" || echo "$@" ); exit;
 
 /**
  * @use:
@@ -12,4 +12,4 @@ require('http').createServer((req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     res.end('Hello World');
     console.info(res.statusCode, req.url);
-}).listen(8080, _ => console.info(`${process.env.DOCKERIZED ? 'dockerized' : 'local'} NodeJS ${process.versions.node} running at http://localhost:8080/`));
+}).listen(8080, _ => console.info(`${process.env.DOCKERIZED ? 'dockerized' : 'local'} NodeJS ${process.versions.node} running at http://localhost:${process.env.PORT}/`));
