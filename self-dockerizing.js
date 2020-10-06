@@ -1,4 +1,4 @@
-//usr/bin/env docker run -e "PORT=${PORT:=8080}" -e "DOCKERIZED=1" --rm --init -it -p $PORT:$PORT -v "$PWD":"$PWD" -w "$PWD" node:${NODE_VERSION:-latest} $( (( $# == 0 )) && echo "node $PWD/${0#./}" || echo "$@" ); exit;
+//usr/bin/env echo && if [ -f "$PWD/.env" ]; then source "$PWD/.env"; fi; docker run -e "PORT=${PORT:=8080}" -e "DOCKERIZED=1" --rm --init -it -p $PORT:$PORT -v "$PWD":"$PWD" -w "$PWD" node:${NODE_VERSION:-latest} $( (( $# == 0 )) && echo "node $PWD/${0#./}" || echo "$@" ); exit;
 
 /**
  * @use:
@@ -7,10 +7,22 @@
  *   As this is an interactive docker terminal you can also proxy any other command through docker e.g. `./self-dockerizing.js bash`
  *   To run the same file locally use `node self-dockerizing.js`.
  */
-const { PORT=8080 } = process.env;
-require('http').createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Hello World');
-    console.info(res.statusCode, req.url);
-}).listen(PORT, _ => console.info(`${process.env.DOCKERIZED ? 'dockerized' : 'local'} NodeJS ${process.versions.node} running at http://localhost:${PORT}/`));
+const http = require('http');
+const { PORT = 8080 } = process.env;
+const route = {
+    '/': async (req, res) => {
+        res.write('Hello World');
+    }
+};
+http.createServer(async (req, res) => {
+    const url = new URL(req.url, `http://localhost:${PORT}`);
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+    if (route[url.pathname]) {
+        res.statusCode = 200;
+        await route[url.pathname](req, res);
+    }
+    res.statusMessage = http.STATUS_CODES[res.statusCode] || '';
+    if (!res.writableEnded) res.end();
+    console.debug(res.statusCode, req.method, req.url);
+}).listen(PORT, error => console[error ? 'error' : 'info'](error || `${process.env.DOCKERIZED ? 'dockerized' : 'local'} NodeJS ${process.versions.node} running at http://localhost:${PORT}/`));
