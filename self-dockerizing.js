@@ -7,7 +7,7 @@
  *   As this is an interactive docker terminal you can also proxy any other command through docker e.g. `./self-dockerizing.js bash`
  *   To run the same file locally use `node self-dockerizing.js`.
  */
-const { PORT } = process.env;
+const { PORT=8080 } = process.env;
 require('http').createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
