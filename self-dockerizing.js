@@ -1,4 +1,7 @@
-//usr/bin/env echo "NodeJS ${NODE_VERSION:=$(if [ -f package.json ]; then awk '/node/{print $NF}' package.json | tr -d \"; else echo latest; fi)}"; if [ -f "$PWD/.env" ]; then source "$PWD/.env"; fi; docker run -e "PORT=${PORT:=8080}" -e "DOCKERIZED=1" --rm --init -it -p $PORT:$PORT -v "$PWD":"$PWD" -w "$PWD" node:$NODE_VERSION $( (( $# == 0 )) && echo "node $PWD/${0#./}" || echo "$@" ); exit;
+//usr/bin/env [ ${NODE_ENV:='development'} ] && app() { local v=$(awk "/\"$1\"\:/{print \$NF}" package.json | tr -d \",); [ $v ] && echo $v || echo $2; }
+//usr/bin/env [ -d .git ] && IMAGE="$(app name $(basename $PWD))-$(app version 1.0.0)-$(git rev-parse --short HEAD)"
+//usr/bin/env [ ${NODE_VERSION:=$(app node 14)} ]; [ -f Dockerfile ] && docker build . -t ${IMAGE:="$(app name $(basename $PWD))-$(app version 1.0.0)" } || IMAGE="node:$NODE_VERSION"
+//usr/bin/env [ $(which docker) ] && docker run --rm --init -it -v "$PWD":"$PWD" -w "$PWD" node:${NODE_VERSION} ${@:-node $PWD/$0}; exit;
 
 /**
  * simple self-dockerizing node server
