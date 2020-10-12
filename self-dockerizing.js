@@ -6,6 +6,7 @@
  * + runnable as a single file due to the first line being a JS comment that is bash executable
  *
  * @use:
+ *   Rename `self-dockerizing.js` to something more usable e.g. `app.js`
  *   Make this file runnable `chmod +x app.js` then you can just start it using `./app.js` and it will run in docker under the same path.
  *   As this is an interactive docker terminal you can also proxy any other command through docker e.g. `./app.js bash`
  *   To run the same file without docker use the normal `node app.js`.
