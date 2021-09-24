@@ -1,4 +1,4 @@
-function functionType(x) {
+function isFunction(x) {
     return typeof x !== 'function'
         ? ''
         : x.hasOwnProperty('arguments')
