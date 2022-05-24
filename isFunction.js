@@ -1,9 +1,11 @@
 function isFunction(x) {
-    return typeof x !== 'function'
-        ? ''
-        : x.hasOwnProperty('arguments')
-            ? 'function'
-            : x.prototype
-                ? 'class'
-                : 'arrow';
+    return typeof x === 'function'
+        ? x.prototype
+            ? Object.getOwnPropertyDescriptor(x, 'prototype').writable
+                ? 'function'
+                : 'class'
+        : x.constructor.name === 'AsyncFunction'
+        ? 'async'
+        : 'arrow'
+    : '';
 }
