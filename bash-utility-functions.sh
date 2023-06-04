@@ -2,6 +2,10 @@
 
 __DIRNAME="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
+stderrRed(){
+  exec 3>&2; exec 2> >(sed -u 's/^\(.*\)$/'$'\e''[31m\1'$'\e''[m/' >&3)
+}
+
 echorun(){
   cmd="$1"
   args="${@:2}"
