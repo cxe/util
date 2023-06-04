@@ -9,9 +9,10 @@ stderrRed(){
 echorun(){
   cmd="$1"
   args="${@:2}"
-  echo -e "\033[1;36m${cmd}\033[0;36m ${args}\033[0m"
+  >&2 echo -e "\033[1;36m${cmd}\033[0;36m ${args}\033[0m"
   [ -z $DRY ] && $cmd $args
 }
+
 
 # @usage FOO="$(findUpwardFile foo.txt)"
 readUpwardFile() {
