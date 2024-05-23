@@ -34,5 +34,12 @@ args(){
     set -- ${args[@]}
 }
 
+catch(){
+    errno=$?
+    >&2 echo -en "\033[31m$(type -t ${FUNCNAME[1]}) '${FUNCNAME[1]}' failed with error-code #${errno}${error+": ${error//$'\n'/\\\\n} "}\033[2;31m. Trace:"
+    for ((i=${#BASH_SOURCE[@]} - 1; i > 0; i-- )); do >&2 echo -n " ➛ ${FUNCNAME[$i]} (${BASH_SOURCE[$i]}:${BASH_LINENO[$i]})"; done
+    >&2 echo -e "\033[0m"
+}
+
 # if not sourced and called with args
 (return 0 2>/dev/null) || { [[ $# -gt 0 ]] && [ "$( type -t $1 )" == function ] && "$@" }
