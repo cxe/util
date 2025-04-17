@@ -1,0 +1,23 @@
+* copy*
+*.code-workspace
+*.log
+*.spec.*
+*.test.*
+.editorconfig
+.git/
+.github/
+.idea/
+.npmignore
+.nvmrc
+.travis.yml
+.vscode/
+CONTRIBUTING.md
+SECURITY.md
+__*
+badge.png
+badge.svg
+docs/
+sticker.png
+sticker.svg
+test/
+tmp/
