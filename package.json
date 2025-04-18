@@ -1,0 +1,7 @@
+{
+  "name": "@cxe/util",
+  "version": "0.1.0",
+  "description": "utility libraries",
+  "keywords": ["js", "bash", "typescript", "utilities"],
+  "license": "ISC"
+}
