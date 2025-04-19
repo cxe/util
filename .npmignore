@@ -1,5 +1,6 @@
 * copy*
 *.code-workspace
+*.env
 *.log
 *.spec.*
 *.test.*

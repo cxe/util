@@ -1,4 +1,5 @@
 * copy*
+*.env
 *.log
 node_modueles/
 tmp/
