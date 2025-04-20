@@ -13,6 +13,7 @@
 .travis.yml
 .vscode/
 CONTRIBUTING.md
+README.md
 SECURITY.md
 __*
 badge.png
