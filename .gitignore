@@ -1,5 +1,6 @@
 * copy*
 *.env
 *.log
-node_modueles/
+node_modules/
+test/coverage/
 tmp/

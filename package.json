@@ -2,6 +2,38 @@
   "name": "@cxe/util",
   "version": "0.1.0",
   "description": "utility libraries",
-  "keywords": ["js", "bash", "typescript", "utilities"],
-  "license": "ISC"
+  "keywords": [
+    "js",
+    "bash",
+    "typescript",
+    "utilities"
+  ],
+  "license": "ISC",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/test/**/*.test.*"
+    ],
+    "coverageDirectory": "test/coverage",
+    "collectCoverageFrom": [
+      "**/*.{js,jsx}",
+      "!**/node_modules/**",
+      "!**/vendor/**",
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json",
+      "node"
+    ]
+  }
 }
