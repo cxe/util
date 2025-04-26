@@ -1,6 +1,8 @@
 {
   "name": "@cxe/util",
   "version": "0.1.0",
+  "private": false,
+  "type": "module",
   "description": "utility libraries",
   "keywords": [
     "js",
