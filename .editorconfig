@@ -39,6 +39,7 @@ max_line_length = off
 
 [*.{sh,bat,command}]
 max_line_length = off
+indent_style = unset
 
 [*.{ini,py,py.tpl,rst}]
 indent_size = 4
