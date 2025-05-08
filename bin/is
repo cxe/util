@@ -1,11 +1,34 @@
 #!/usr/bin/env bash
 
 # #usage   is function util && echo $_
-is(){
+is() {
     case "$1" in
-        function) [[ "$( type -t $2 )" == "$1" ]];;
+        function) [[ $(type -t "$2") == function ]];;
+        variable) [[ -v "$2" ]];;
+        array) [[ "$(declare -p "$2" 2>/dev/null)" =~ "declare -a" ]];;
+        associative) [[ "$(declare -p "$2" 2>/dev/null)" =~ "declare -A" ]];;
         number) [[ "$2" =~ ^[-+]?[0-9]*\.?[0-9]+$ ]];;
-        # url) [[ "$2" =~ ^https?://[a-zA-Z0-9._~:/?#\[\]@!$&\'()*+,;=%-]+$ ]];;
+        integer) [[ "$2" =~ ^-?[0-9]+$ ]];;
+        falsy)
+            local v="${2,,}"
+            [[ -z "$v" || "$v" == false || "$v" == 0 || "$v" == no || "$v" == off ]];;
+        truthy)
+            if [[ "$2" =~ ^[-+]?[0-9]*\.?[0-9]+$ ]]; then
+                (( $2 != 0 ))
+            else
+                local v="${2,,}"
+                [[ "$v" == true || "$v" == yes || "$v" == on ]]
+            fi
+            ;;
+        bool)
+            is truthy "$2" || is falsy "$2"
+            ;;
+        url)
+            [[ "$2" =~ ^(https?|mailto|ftps?)://[a-zA-Z0-9._~:/?#\[\]@!$&'()*+,;=%-]+$ ]];;
+        file) [[ -f "$2" ]];;
+        dir) [[ -d "$2" ]];;
+        empty) [[ ! -s "$2" ]];;
+        exec) [[ -x "$2" ]];;
         *) return 1;;
     esac
 }
