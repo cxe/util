@@ -26,6 +26,10 @@ declare -F util >/dev/null || {
         printf '%s\n' "${out[@]}" | sort
     }
 
+    util_setup(){
+        : # todo
+    }
+
     declare -rx UTIL_PATH UTIL_VERSION
     declare -x UTIL_VAR
 
