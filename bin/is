@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# #usage   is function util && echo $_
+is(){
+    case "$1" in
+        function) [[ "$( type -t $2 )" == "$1" ]];;
+        number) [[ "$2" =~ ^[-+]?[0-9]*\.?[0-9]+$ ]];;
+        # url) [[ "$2" =~ ^https?://[a-zA-Z0-9._~:/?#\[\]@!$&\'()*+,;=%-]+$ ]];;
+        *) return 1;;
+    esac
+}

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+declare -F util >/dev/null || {
+    UTIL_VERSION=0.4.0
+    UTIL_PATH="$( cd -- "${BASH_SOURCE[0]%/*}/.." && pwd )"
+
+    util(){
+        local tmp="UTIL_${1^^}"
+        [ "${!tmp}" ] && echo "${!tmp}" && return
+
+        tmp="util_$1"
+        declare -F "$tmp" >/dev/null && { "$tmp" "$@"; return $?; }
+
+        echo -e "\e[31minvalid util command '$1'\e[0m" >&2
+    }
+
+    util_build(){
+        mkdir -p "$UTIL_PATH/node_modules/.bin"
+    }
+
+    util_list() {
+        local ref low out=()
+        for ref in "$UTIL_PATH/bin/"*; do out+=("${ref##*/}()"); done
+        while read -r ref; do out+=("${ref:5}()"); done < <(compgen -A function util_)
+        while read -r ref; do low="${ref,,}"; out+=("${low:5}: \"${!ref}\""); done < <(compgen -v UTIL_)
+        printf '%s\n' "${out[@]}" | sort
+    }
+
+    declare -rx UTIL_PATH UTIL_VERSION
+    declare -x UTIL_VAR
+
+    [ "$0" == "${BASH_SOURCE[0]}" ] && util "$@"
+}
