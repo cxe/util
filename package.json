@@ -1,6 +1,6 @@
 {
   "name": "@cxe/util",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "private": false,
   "type": "module",
   "description": "utility libraries",
@@ -26,7 +26,7 @@
     "collectCoverageFrom": [
       "**/*.{js,jsx}",
       "!**/node_modules/**",
-      "!**/vendor/**",
+      "!**/vendor/**"
     ],
     "transform": {
       "^.+\\.ts$": "ts-jest"

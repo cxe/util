@@ -15,7 +15,9 @@ declare -F util >/dev/null || {
     }
 
     util_build(){
-        mkdir -p "$UTIL_PATH/node_modules/.bin"
+        local f nmb="$UTIL_PATH/node_modules/.bin"
+        mkdir -p "$nmb"
+        for f in "$UTIL_PATH/bin/"*; do ln -s "$f" "$nmb"; done
     }
 
     util_list() {
