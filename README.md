@@ -20,15 +20,14 @@ npx @cxe/util
 ```
 or
 ```console
-curl https://raw.githubusercontent.com/cxe/util/master/cli --create-dirs -o ~/.cxe/util/cli && \
-    chmod +x ~/.cxe/util/cli && \
-    ~/.cxe/util/cli --install
+curl https://raw.githubusercontent.com/cxe/util/latest/bin/util --create-dirs -o ~/.cxe/util/bin/util && \
+    chmod +x ~/.cxe/util/bin/util && ~/.cxe/util/bin/util setup
 ```
 
 ## Getting Started
 ```console
 # learn more about the commandline options
-cxe --help
+util --help
 
 # start an interactive terminal in a docker image mounting the current working directory
 cxe node:latest

@@ -5,10 +5,18 @@ declare -F util >/dev/null || {
     UTIL_PATH="$( cd -- "${BASH_SOURCE[0]%/*}/.." && pwd )"
 
     util(){
-        local tmp="UTIL_${1^^}"
-        [ "${!tmp}" ] && echo "${!tmp}" && return
+        local tmp="${1:-?}"
 
-        tmp="util_$1"
+        case "$tmp" in
+            --help|-?) tmp=help;;
+        esac
+
+        if [[ "$tmp" == [A-Za-z_]* ]]; then
+            tmp="UTIL_${tmp^^}"
+            [ "${!tmp}" ] && echo "${!tmp}" && return
+        fi
+
+        tmp="${tmp,,}"
         declare -F "$tmp" >/dev/null && { "$tmp" "$@"; return $?; }
 
         echo -e "\e[31minvalid util command '$1'\e[0m" >&2
@@ -20,12 +28,15 @@ declare -F util >/dev/null || {
         for f in "$UTIL_PATH/bin/"*; do ln -s "$f" "$nmb"; done
     }
 
-    util_list() {
+    util_help() {
         local ref low out=()
         for ref in "$UTIL_PATH/bin/"*; do out+=("${ref##*/}()"); done
         while read -r ref; do out+=("${ref:5}()"); done < <(compgen -A function util_)
         while read -r ref; do low="${ref,,}"; out+=("${low:5}: \"${!ref}\""); done < <(compgen -v UTIL_)
+        
+        echo -e "\e[36;1m\nutil functions\n\e[22m"
         printf '%s\n' "${out[@]}" | sort
+        echo -e "\e[0m"
     }
 
     util_setup(){
