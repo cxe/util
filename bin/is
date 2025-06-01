@@ -1,40 +1,66 @@
 #!/usr/bin/env bash
 
-# #usage   is function util && echo $_
-is() {
-    case "$1" in
-        array) [[ "$(declare -p "$2" 2>/dev/null)" =~ "declare -a" ]];;
-        associative) [[ "$(declare -p "$2" 2>/dev/null)" =~ "declare -A" ]];;
-        block) [[ -b "$2" ]];;
-        bool) is truthy "$2" || is falsy "$2" ;;
-        char) [[ -c "$2" ]];;
-        defined) [[ "${2+x}" ]];;
-        dir) [[ -d "$2" ]];;
-        empty) [[ ! -s "$2" ]];;
-        exec) [[ -x "$2" ]];;
-        falsy)
+# @usage: is <kind> <value>
+# Beispiel:
+#   is dir /etc            && echo "is a directory"
+#   is truthy "$x"         && echo "$_ is truthy"
+#   is array myArr         && echo "is an indexed arraz"
+#   is function myFunc     && echo "is a shell function"
+declare -F is >/dev/null || { set -x
+    is() {
+        case "$1" in
+            block) [[ -b "$2" ]];;
+            char) [[ -c "$2" ]];;
+            defined) [[ ${2+x} ]];;
+            dir) [[ -d "$2" ]];;
+            empty) [[ ! -s "$2" ]];;
+            exec) [[ -x "$2" ]];;
+            file) [[ -f "$2" ]];;
+            function) declare -F "$2" >/dev/null ;;
+            integer) [[ "$2" =~ ^[+-]?[0-9]+$ ]];;
+            number) [[ "$2" == ?(-)+([0-9])?(.*([0-9])) ]];;
+            readable) [[ -r "$2" ]];;
+            socket) [[ -S "$2" ]];;
+            subshell) [[ $$ != "${BASHPID[0]}" ]];;
+            symlink) [[ -L "$2" ]];;
+            variable) [[ -v "$2" ]];;
+            writable) [[ -w "$2" ]];;
+            array|associative)
+                local decl
+                decl="$(declare -p "$2" 2>/dev/null)" || return 1
+                [[ $1 == array ]] && [[ $decl == "declare -a"* ]] || [[ $decl == "declare -A"* ]]
+                ;;
+            bool)
             local v="${2,,}"
-            [[ -z "$v" || "$v" == false || "$v" == 0 || "$v" == no || "$v" == off ]]
+            [ -z "$v" ] || [ "$v" == false ] || [ "$v" == no  ] || [ "$v" == off ] || \
+                        [ "$v" == true  ] || [ "$v" == yes ] || [ "$v" == on  ]
             ;;
-        file) [[ -f "$2" ]];;
-        function) [[ $(type -t "$2") == function ]];;
-        integer) [[ "$2" =~ ^-?[0-9]+$ ]];;
-        number) [[ "$2" =~ ^[-+]?[0-9]*\.?[0-9]+$ ]];;
-        readable) [[ -r "$2" ]];;
-        socket) [[ -S "$2" ]];;
-        subshell) [[ "$$" != "$BASHPID" ]];;
-        symlink) [[ -L "$2" ]];;
-        truthy)
-            if [[ "$2" =~ ^[-+]?[0-9]*\.?[0-9]+$ ]]; then
-                (( $2 != 0 ))
-            else
+            truthy)
                 local v="${2,,}"
-                [[ "$v" == true || "$v" == yes || "$v" == on ]]
-            fi
+                [ -n "$v" ] && [ "$v" != false ] && [ "$v" != 0 ] && [ "$v" != no ] && \
+                            [ "$v" != off ] && [ "$v" != null ] && [ "$v" != undefined ]
             ;;
-        url) [[ "$2" =~ ^(https?|mailto|ftps?)://[a-zA-Z0-9._~:/?#\[\]@!$&'()*+,;=%-]+$ ]];;
-        variable) [[ -v "$2" ]];;
-        writable) [[ -w "$2" ]];;
-        *) return 1;;
-    esac
+            falsy)
+                local v="${2,,}"
+                [ -z "$v" ] || [ "$v" == false ] || [ "$v" == 0 ] || [ "$v" == no ] || [ "$v" == off ] || [ "$v" == null ] || [ "$v" == undefined ]
+                ;;
+            url) # todo
+                local proto v
+                proto="${2%%://*}"
+                v="${2#*://}"
+
+                case "${proto,,}" in
+                    http|https|ftp|ftps|file|mailto|news|irc|ircs|gopher|nntp|telnet|ldap|ldaps|dict|xmpp|sip|sips|smb|ws|wss|git|ssh|svn|tel|mms|rtsp|svn|sftp|rsync|rtmp|rtmps|sftp|sftp|sftp+ssh|s3|data|blob|about|javascript|view-source|magnet|bitcoin|geo|magnet|bitcoin|bitcoin-cash|litecoin|dogecoin|dash|zcash|ethereum|solana|polkadot|substrate|cosmos|osmosis|tron|tezos|avalanche|algorand|filecoin|near|hedera|elrond|chia|arweave|decred|monero|eos|iota|zcash|dash|dogecoin|litecoin|bitcoin-cash|ethereum|solana|polkadot|substrate|cosmos|osmosis|tron|tezos|avalanche|algorand|filecoin|near|hedera|elrond|chia|arweave|decred|monero|eos|iota)
+                        echo $v
+                        [[ "${v%%/*}" =~ ^(([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|localhost|[0-9]{1,3}(\.[0-9]{1,3}){3}|(\[[0-9a-fA-F:]+\]))(:[0-9]{1,5})?$ ]] || return 2
+                        v="${v#*/}"
+                        [[ "$v" == */* || "$v" == *\?* || "$v" == *"#"* || "$v" == "" ]] || return 3
+                        ;;
+                esac
+                ;;
+            esac
+        return 9
+    }
+
+    [ "$0" == "${BASH_SOURCE[0]}" ] && is "$@"
 }
