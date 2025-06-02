@@ -1,6 +1,6 @@
 {
   "name": "@cxe/util",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "private": false,
   "type": "module",
   "description": "utility libraries",
@@ -13,10 +13,7 @@
   "license": "ISC",
   "scripts": {
     "postinstall": "bash -c 'which bun || npm install -g bun;'",
-    "test": "bun"
-  },
-  "devDependencies": {
-    "bun": "1.0.0"
+    "test": "bun test"
   },
   "jest": {
     "testEnvironment": "node",

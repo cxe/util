@@ -7,15 +7,18 @@ import { execSync } from "node:child_process";
  * @returns {{ stdout: string, stderr: string, code: number }}
  */
 export const bash = (cmd) => {
-  console.log(`$ ${cmd}`);
-
   try {
-    const stdout = execSync(cmd, {
-      shell: "/usr/bin/env bash",
+    const output = execSync(cmd, {
+      shell: "bash",
       encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: "pipe",
+      cwd: process.cwd(),
     });
-    return { stdout, stderr: "", code: 0 };
+    return {
+        output,
+        errorText: "",
+        errorCode: 0
+    };
   } catch (err) {
     return {
       output: err.stdout?.toString() ?? "",

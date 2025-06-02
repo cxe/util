@@ -30,20 +30,9 @@ declare -F is >/dev/null || { set -x
                 decl="$(declare -p "$2" 2>/dev/null)" || return 1
                 [[ $1 == array ]] && [[ $decl == "declare -a"* ]] || [[ $decl == "declare -A"* ]]
                 ;;
-            bool)
-            local v="${2,,}"
-            [ -z "$v" ] || [ "$v" == false ] || [ "$v" == no  ] || [ "$v" == off ] || \
-                        [ "$v" == true  ] || [ "$v" == yes ] || [ "$v" == on  ]
-            ;;
-            truthy)
-                local v="${2,,}"
-                [ -n "$v" ] && [ "$v" != false ] && [ "$v" != 0 ] && [ "$v" != no ] && \
-                            [ "$v" != off ] && [ "$v" != null ] && [ "$v" != undefined ]
-            ;;
-            falsy)
-                local v="${2,,}"
-                [ -z "$v" ] || [ "$v" == false ] || [ "$v" == 0 ] || [ "$v" == no ] || [ "$v" == off ] || [ "$v" == null ] || [ "$v" == undefined ]
-                ;;
+            bool) case "${2,,}" in true|yes|on|false|no|off) return 0;; esac;;
+            falsy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 0;; esac;;
+            truthy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 1;; esac; return 0;;
             url) # todo
                 local proto v
                 proto="${2%%://*}"
