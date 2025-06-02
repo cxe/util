@@ -1,1 +1,9 @@
 #!/usr/bin/env bash
+
+declare -F param >/dev/null || {
+    param() {
+        : todo
+    }
+
+    [ "$0" == "${BASH_SOURCE[0]}" ] && param "$@"
+}
