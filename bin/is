@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+shopt -s extglob
 
 # @usage: is <kind> <value>
 # Beispiel:
@@ -6,19 +7,20 @@
 #   is truthy "$x"         && echo "$_ is truthy"
 #   is array myArr         && echo "is an indexed arraz"
 #   is function myFunc     && echo "is a shell function"
-declare -F is >/dev/null || { set -x
+declare -F is >/dev/null || {
     is() {
+        [ -z "$2" ] && return 2
         case "$1" in
             block) [[ -b "$2" ]];;
             char) [[ -c "$2" ]];;
-            defined) [[ ${2+x} ]];;
+            defined) [[ "${2+-}" ]];;
             dir) [[ -d "$2" ]];;
             empty) [[ ! -s "$2" ]];;
             exec) [[ -x "$2" ]];;
             file) [[ -f "$2" ]];;
             function) declare -F "$2" >/dev/null ;;
-            integer) [[ "$2" =~ ^[+-]?[0-9]+$ ]];;
-            number) [[ "$2" == ?(-)+([0-9])?(.*([0-9])) ]];;
+            integer) [[ "$2" == ?(-)+([0-9]) ]];;
+            number) [[ "$2" == ?(-)?(+([0-9]).+([0-9])|+([0-9])) ]];;
             readable) [[ -r "$2" ]];;
             socket) [[ -S "$2" ]];;
             subshell) [[ $$ != "${BASHPID[0]}" ]];;
@@ -30,8 +32,8 @@ declare -F is >/dev/null || { set -x
                 decl="$(declare -p "$2" 2>/dev/null)" || return 1
                 [[ $1 == array ]] && [[ $decl == "declare -a"* ]] || [[ $decl == "declare -A"* ]]
                 ;;
-            bool) case "${2,,}" in true|yes|on|false|no|off) return 0;; esac;;
-            falsy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 0;; esac;;
+            bool) case "${2,,}" in true|yes|on|false|no|off) return 0;; esac; return 1;;
+            falsy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 0;; esac; return 1;;
             truthy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 1;; esac; return 0;;
             url) # todo
                 local proto v
@@ -47,8 +49,7 @@ declare -F is >/dev/null || { set -x
                         ;;
                 esac
                 ;;
-            esac
-        return 9
+        esac
     }
 
     [ "$0" == "${BASH_SOURCE[0]}" ] && is "$@"
