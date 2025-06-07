@@ -36,5 +36,11 @@ describe("is", () => {
         it('should be detected', bash_is('file ./README.md'));
         it('fails non-files', bash_fails('file NOT_A_THING'));
     });
+    describe('writable', ()=>{
+        it('should be detected', bash_is('writable ./README.md'));
+    });
+    describe('readable', ()=>{
+        it('should be detected', bash_is('readable ./README.md'));
+    });
   });
 });

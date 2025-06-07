@@ -33,7 +33,7 @@ declare -F util >/dev/null || {
         for ref in "$UTIL_PATH/bin/"*; do out+=("${ref##*/}()"); done
         while read -r ref; do out+=("${ref:5}()"); done < <(compgen -A function util_)
         while read -r ref; do low="${ref,,}"; out+=("${low:5}: \"${!ref}\""); done < <(compgen -v UTIL_)
-        
+
         echo -e "\e[36;1m\nutil functions\n\e[22m"
         printf '%s\n' "${out[@]}" | sort
         echo -e "\e[0m"

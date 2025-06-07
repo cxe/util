@@ -33,8 +33,10 @@ declare -F is >/dev/null || {
                 [[ $1 == array ]] && [[ $decl == "declare -a"* ]] || [[ $decl == "declare -A"* ]]
                 ;;
             bool) case "${2,,}" in true|yes|on|false|no|off) return 0;; esac; return 1;;
-            falsy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 0;; esac; return 1;;
+            falsy|not) case "${2,,}" in ""|false|no|none|off|null|undefined|0) return 0;; esac; return 1;;
             truthy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 1;; esac; return 0;;
+            online) (echo > /dev/tcp/8.8.8.8/53) 2>/dev/null;;
+            command) command -v "$1" >/dev/null 2>&1;;
             url) # todo
                 local proto v
                 proto="${2%%://*}"
