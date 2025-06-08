@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+declare -F node >/dev/null || {
+    export NODE_BIN="${NODE_BIN:-$( which node 2>/dev/null )}"
+    export NODE_VERSION="${NODE_VERSION:-}" # todo
+    export NODE_ENV="${NODE_ENV:-development}"
+
+    node() {
+        "$NODE_BIN" "$@"
+    }
+
+    [ "$0" == "${BASH_SOURCE[0]}" ] && node "$@"
+}
