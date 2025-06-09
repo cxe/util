@@ -46,5 +46,7 @@ declare -F util >/dev/null || {
     declare -rx UTIL_PATH UTIL_VERSION
     declare -x UTIL_VAR
 
+    source_fetch(){ local src="$1" url="$2"; if [ ! -s "$src" ]; then mkdir -p "${src%/*}" && curl -fksSL "$url" -o "$src" || return 1; fi; source "$src"; }
+
     [ "$0" == "${BASH_SOURCE[0]}" ] && util "$@"
 }
