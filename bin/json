@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+declare -F json >/dev/null || {
+    json() {
+        : todo
+    }
+
+    [ "$0" == "${BASH_SOURCE[0]}" ] && json "$@"
+}
