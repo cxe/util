@@ -6,6 +6,13 @@ declare -F node >/dev/null || {
     export NODE_VERSION="${NODE_VERSION:-}" # todo
     export NODE_ENV="${NODE_ENV:-development}"
 
+    if [[ -z "$NODE_BIN" ]]; then
+        echo "[ERROR] Node.js not found in PATH" >&2
+        return 127 2>/dev/null || exit 127
+    fi
+
+    export NODE_VERSION="${NODE_VERSION:-$("$NODE_BIN" -v 2>/dev/null || echo unknown)}"
+
     node() {
         "$NODE_BIN" "$@"
     }
