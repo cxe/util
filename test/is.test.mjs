@@ -32,6 +32,12 @@ describe("is", () => {
         it('should be detected', bash_is('variable PATH'));
         it('fails non-vars', bash_fails('variable NOT_A_THING'));
     });
+    describe('varname', ()=>{
+        it('should be detected', bash_is('varname PATH'));
+        it('fails for numbers', bash_fails('varname 42'));
+        it('fails for invalid chars', bash_fails('varname /usr/bin'));
+        it('fails for invalid chars', bash_fails('varname "hello world"'));
+    });
     describe('file', ()=>{
         it('should be detected', bash_is('file ./README.md'));
         it('fails non-files', bash_fails('file NOT_A_THING'));

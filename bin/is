@@ -7,51 +7,69 @@ shopt -s extglob
 #   is truthy "$x"         && echo "$_ is truthy"
 #   is array myArr         && echo "is an indexed arraz"
 #   is function myFunc     && echo "is a shell function"
-declare -F is >/dev/null || {
+declare -F is >/dev/null || { set -x
     is() {
-        [ -z "$2" ] && return 2
-        case "$1" in
-            block) [[ -b "$2" ]];;
-            char) [[ -c "$2" ]];;
-            defined) [[ "${2+-}" ]];;
-            dir) [[ -d "$2" ]];;
-            empty) [[ ! -s "$2" ]];;
-            exec) [[ -x "$2" ]];;
-            file) [[ -f "$2" ]];;
-            function) declare -F "$2" >/dev/null ;;
-            integer) [[ "$2" == ?(-)+([0-9]) ]];;
-            number) [[ "$2" == ?(-)?(+([0-9]).+([0-9])|+([0-9])) ]];;
-            readable) [[ -r "$2" ]];;
-            socket) [[ -S "$2" ]];;
-            subshell) [[ $$ != "${BASHPID[0]}" ]];;
-            symlink) [[ -L "$2" ]];;
-            variable) [[ -v "$2" ]];;
-            writable) [[ -w "$2" ]];;
-            array|associative)
-                local decl
-                decl="$(declare -p "$2" 2>/dev/null)" || return 1
-                [[ $1 == array ]] && [[ $decl == "declare -a"* ]] || [[ $decl == "declare -A"* ]]
-                ;;
-            bool) case "${2,,}" in true|yes|on|false|no|off) return 0;; esac; return 1;;
-            falsy|not) case "${2,,}" in ""|false|no|none|off|null|undefined|0) return 0;; esac; return 1;;
-            truthy) case "${2,,}" in ""|false|no|off|null|undefined|0) return 1;; esac; return 0;;
-            online) (echo > /dev/tcp/8.8.8.8/53) 2>/dev/null;;
-            command) command -v "$1" >/dev/null 2>&1;;
-            url) # todo
-                local proto v
-                proto="${2%%://*}"
-                v="${2#*://}"
-
-                case "${proto,,}" in
-                    http|https|ftp|ftps|file|mailto|news|irc|ircs|gopher|nntp|telnet|ldap|ldaps|dict|xmpp|sip|sips|smb|ws|wss|git|ssh|svn|tel|mms|rtsp|svn|sftp|rsync|rtmp|rtmps|sftp|sftp|sftp+ssh|s3|data|blob|about|javascript|view-source|magnet|bitcoin|geo|magnet|bitcoin|bitcoin-cash|litecoin|dogecoin|dash|zcash|ethereum|solana|polkadot|substrate|cosmos|osmosis|tron|tezos|avalanche|algorand|filecoin|near|hedera|elrond|chia|arweave|decred|monero|eos|iota|zcash|dash|dogecoin|litecoin|bitcoin-cash|ethereum|solana|polkadot|substrate|cosmos|osmosis|tron|tezos|avalanche|algorand|filecoin|near|hedera|elrond|chia|arweave|decred|monero|eos|iota)
-                        echo $v
-                        [[ "${v%%/*}" =~ ^(([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|localhost|[0-9]{1,3}(\.[0-9]{1,3}){3}|(\[[0-9a-fA-F:]+\]))(:[0-9]{1,5})?$ ]] || return 2
-                        v="${v#*/}"
-                        [[ "$v" == */* || "$v" == *\?* || "$v" == *"#"* || "$v" == "" ]] || return 3
-                        ;;
-                esac
-                ;;
-        esac
+        local error=()
+        if [ $# == 1 ]; then
+            case "$1" in
+                online) (echo > /dev/tcp/8.8.8.8/53) 2>/dev/null;;
+                *) error=(2 "missing second argument");;
+            esac
+        else
+            [ -z "$2" ] && error=(1 "empty value")
+            case "$1" in
+                block) [[ -b "$2" ]] || error=(1 "is not a block-device");;
+                char) [[ -c "$2" ]] || error=(1 "is not a char-device");;
+                defined) [[ "${2+-}" ]] || error=(1 "is not defined");;
+                dir) [[ -d "$2" ]] || error=(1 "is not a directory");;
+                empty) [[ ! -s "$2" ]] || error=(1 "is not an empty file");;
+                exec|executable) [[ -x "$2" ]] || error=(1 "is not executable");;
+                file) [[ -f "$2" ]] || error=(1 "is not a file");;
+                function) declare -F "$2" >/dev/null || error=(1 "is not a function");;
+                integer) [[ "$2" == ?(-)+([0-9]) ]] || error=(1 "is not an integer");;
+                number) [[ "$2" == ?(-)?(+([0-9]).+([0-9])|+([0-9])) ]] || error=(1 "is not a number");;
+                readable) [[ -r "$2" ]] || error=(1 "is not readable");;
+                socket) [[ -S "$2" ]] || error=(1 "is not a socket");;
+                subshell) [[ $$ != "${BASHPID[0]}" ]] || error=(1 "is not a subshell");;
+                symlink) [[ -L "$2" ]] || error=(1 "is not a symlink");;
+                variable) [[ -v "$2" ]] || error=(1 "is not a variable");;
+                varname)
+                    case "$2" in
+                        [!a-zA-Z_]*) error=(2 "varname must start with a letter or underscore");;
+                        *[!a-zA-Z0-9_]*) error=(3 "varname contains invalid characters");;
+                    esac
+                    ;;
+                writable) [[ -w "$2" ]] || error=(1 "is not writable");;
+                array|associative)
+                    local decl
+                    decl="$( declare -p "$2" 2>/dev/null )" || error=(2 "is not defined");
+                    decl="${decl//declare -/}"
+                    if [[ $1 == array ]]; then
+                        [[ $decl == *a* ]] || error=(3 "is not an array");
+                    else
+                        [[ $decl == *A* ]] || error=(3 "is not a hashmap");
+                    fi ;;
+                bool) case "${2,,}" in true|yes|on|false|no|off);; *)error=(1 "is not a boolean");;esac;;
+                falsy|not) case "${2,,}" in ""|false|no|none|off|null|undefined|0);;*)error=(1 "is not falsy");;esac;;
+                truthy) case "${2,,}" in ""|false|no|off|null|undefined|0)error=(1 "is not truthy");;esac;;
+                command) command -v "$2" >/dev/null 2>&1 || error=(1 "is not a command");;
+                url) # todo
+                    local proto v
+                    proto="${2%%://*}"
+                    v="${2#*://}"
+                    case "${proto,,}" in
+                        http|https|ftp|ftps|file|mailto|news|irc|ircs|gopher|nntp|telnet|ldap|ldaps|dict|xmpp|sip|sips|smb|ws|wss|git|ssh|svn|tel|mms|rtsp|svn|sftp|rsync|rtmp|rtmps|sftp|sftp|sftp+ssh|s3|data|blob|about|javascript|view-source|magnet|bitcoin|geo|magnet|bitcoin|bitcoin-cash|litecoin|dogecoin|dash|zcash|ethereum|solana|polkadot|substrate|cosmos|osmosis|tron|tezos|avalanche|algorand|filecoin|near|hedera|elrond|chia|arweave|decred|monero|eos|iota|zcash|dash|dogecoin|litecoin|bitcoin-cash|ethereum|solana|polkadot|substrate|cosmos|osmosis|tron|tezos|avalanche|algorand|filecoin|near|hedera|elrond|chia|arweave|decred|monero|eos|iota)
+                           # echo $v
+                           # [[ "${v%%/*}" =~ ^(([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}|localhost|[0-9]{1,3}(\.[0-9]{1,3}){3}|(\[[0-9a-fA-F:]+\]))(:[0-9]{1,5})?$ ]] || return 2
+                           # v="${v#*/}"
+                           # [[ "$v" == */* || "$v" == *\?* || "$v" == *"#"* || "$v" == "" ]] || return 3
+                           error=(1 "is not a URL");;
+                    esac
+                    ;;
+            esac
+        fi
+        (( ${#error[@]} )) && echo -e "\e[31mError #${error[0]}: ${error[1]}\e[0m" >&2
+        return "${error[0]:-0}"
     }
 
     [ "$0" == "${BASH_SOURCE[0]}" ] && is "$@"
