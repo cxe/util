@@ -4,8 +4,8 @@ import { bash } from "../bash.mjs";
 const bash_is = (args) => () => expect(bash(`./bin/is ${args}`).errorCode).toBe(0);
 const bash_fails = (args) => () => expect(bash(`./bin/is ${args}`).errorCode).not.toBe(0);
 
-describe("is", () => {
-  describe("shell", () => {
+describe("bash", () => {
+  describe("is", () => {
     describe('bool', ()=>{
         it('bool', bash_is('bool true'));
         it('truthy', bash_is('truthy foobar'));
