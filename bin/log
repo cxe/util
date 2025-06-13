@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+declare -F log >/dev/null || {
+    log() {
+        case "$1" in
+            --trace)
+                local i s f l n
+                n=${#BASH_LINENO[@]}
+                for ((i=1; i<n; i++)); do
+                    local s="$(realpath "${BASH_SOURCE[$i]}")"
+                    local f="${FUNCNAME[$i]}"
+                    local l="${BASH_LINENO[$i-1]}"
+                    echo "- ${s}:${l}${f+" ($f)"}"
+                done
+                ;;
+            --warn) shift
+                echo -e "\e[33m[WARN]‣ $*\e[0m" >&2;
+                ;;
+            --err*) shift
+                echo -e "\e[31m[ERROR]‣ $*\e[0m" >&2;
+                ;;
+            --fail*)
+                local code=1; [[ "$1" = *=* ]] && code="${1#*=}"; shift
+                echo -e "\e[31;1m[FAIL]‣ #$code\e[31;22m: $*\e[0m" >&2;
+                exit
+                ;;
+            *)
+                echo -e "\e[34m‣ $*\e[0m" >&2;
+                ;;
+        esac
+    }
+
+    [ "$0" == "${BASH_SOURCE[0]}" ] && log "$@"
+}

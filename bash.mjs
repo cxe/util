@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 
 /**
@@ -6,24 +6,17 @@ import { execSync } from "node:child_process";
  * @param cmd {string} - Bash-Befehl
  * @returns {{ stdout: string, stderr: string, code: number }}
  */
-export const bash = (cmd) => {
-  try {
-    const output = execSync(cmd, {
-      shell: "bash",
-      encoding: "utf8",
-      stdio: "pipe",
-      cwd: process.cwd(),
-    });
-    return {
-        output,
-        errorText: "",
-        errorCode: 0
-    };
-  } catch (err) {
-    return {
-      output: err.stdout?.toString() ?? "",
-      errorText: err.stderr?.toString() ?? err.message,
-      errorCode: err.status ?? 1,
-    };
-  }
+export const bash = (input) => {
+  const { stdout, stderr, status } = spawnSync("bash", ["-c", input], {
+    encoding: "utf8",
+    cwd: process.cwd(),
+    env: { ...process.env, LC_ALL: "C" },
+  });
+
+  return {
+    input,
+    output: stdout.trimEnd(),
+    errorText: stderr.trimEnd(),
+    errorCode: status ?? 0,
+  };
 };
