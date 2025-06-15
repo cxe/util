@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 declare -F json >/dev/null || {
+    declare -rgx JSON_MIMETYPE="application/json"
+
     json() {
         : todo
     }

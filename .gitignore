@@ -1,6 +1,7 @@
 * copy*
 *.env
 *.log
+*.todo.md
 node_modules/
 test/coverage/
-tmp/
+.tmp/

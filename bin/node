@@ -16,6 +16,6 @@ declare -F node >/dev/null || {
     node() {
         "$NODE_BIN" "$@"
     }
-
+ 
     [ "$0" == "${BASH_SOURCE[0]}" ] && node "$@"
 }
