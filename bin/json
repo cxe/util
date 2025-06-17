@@ -2,6 +2,8 @@
 
 declare -F json >/dev/null || {
     declare -rgx JSON_MIMETYPE="application/json"
+    declare -rgx JSON_CONFIG_FILEEXT=(.json .jsonld .jsonc .json5 .ndjson .jsonl .har)
+    declare -rgx JSON_CONFIG_COMMENTS="${JSON_CONFIG_COMMENTS:-}"
 
     json() {
         : todo

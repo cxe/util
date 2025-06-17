@@ -6,7 +6,8 @@ import { spawnSync } from "node:child_process";
  * @param cmd {string} - Bash-Befehl
  * @returns {{ stdout: string, stderr: string, code: number }}
  */
-export const bash = (input) => {
+export const bash = (...parts) => {
+  const input = parts.join(' ');
   const { stdout, stderr, status } = spawnSync("bash", ["-c", input], {
     encoding: "utf8",
     cwd: process.cwd(),
