@@ -2,15 +2,53 @@
 
 declare -F json >/dev/null || {
     declare -rgx JSON_MIMETYPE="application/json"
-    declare -rgx JSON_CONFIG_FILEEXT=(.json .jsonld .jsonc .json5 .ndjson .jsonl .har)
-    declare -rgx JSON_CONFIG_COMMENTS="${JSON_CONFIG_COMMENTS:-}"
+    declare -gx JSON_CONFIG_FILEEXT=(.json .jsonld .jsonc .json5 .ndjson .jsonl .har)
+    declare -gx JSON_CONFIG_COMMENTS="${JSON_CONFIG_COMMENTS:-}"
 
     json() {
-        local w="$*"
-        case "$w" in
-            null|false|true) return 0;;
-            *) return 1;;
-        esac
+        declare s="$*" c w t
+        declare -i k=0 i=0 n=${#s}
+
+        while (( k=i, ++i <= n )); do
+            c="${s:k:1}"
+            case "$c" in
+                '\n'|'\r'|'\t'|' ')
+                    t=space
+                    while (( i < n )); do
+                        case "${s:i:1}" in
+                            '\n'|'\r'|'\t'|' ') ((i++));;
+                            *) break;;
+                        esac
+                    done
+                    ;;
+                [0-9])
+                    t=number
+                    while (( i < n )); do
+                        case "${s:i:1}" in
+                            [0-9]) ((i++));;
+                            *) break;;
+                        esac
+                    done
+                    ;;
+                [a-zA-Z_])
+                    while (( i < n )); do
+                        case "${s:i:1}" in
+                            [a-zA-Z0-9_]) ((i++));;
+                            *) break;;
+                        esac
+                    done
+                    w="${s:k:i-k}"
+                    case "$w" in
+                        null) t=null;;
+                        true|false) t=bool;;
+                        *) t="";;
+                    esac
+                    ;;
+            esac
+            w="${s:k:i-k}"
+            #echo "'$w' '$t'"
+        done
+        [ "$t" ] && return 0 || return 1
     }
 
     [ "$0" == "${BASH_SOURCE[0]}" ] && json "$@"

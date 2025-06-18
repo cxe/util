@@ -7,20 +7,20 @@ const bash_json_var = v => bash(`. "$PWD/bin/json"; test -v ${v} && echo "\$${v}
 describe("bash", () => {
   describe("json", () => {
 
-    it('should expose global variables', () => {
+    it('should expose global variables on import', () => {
         expect(bash_json_var("JSON_MIMETYPE")).toBe('application/json');
         expect(bash_json_var("JSON_CONFIG_COMMENTS")).toBe('');
         expect(bash_json_var("JSON_CONFIG_FILEEXT")).toContain('.json');
     });
 
     it('should not return an error code if valid', () => {
-        for(const value of ['null', 'true', 'false']) { // todo: ['{"foo":"bar"}','{}', ' { } ', '\n{\n}\n', '\t{\t}\t']
+        for(const value of ['null', 'true', 'false', 0, 42, Number.MAX_SAFE_INTEGER]) { // todo: ['{"foo":"bar"}','{}', ' { } ', '\n{\n}\n', '\t{\t}\t']
             expect(bash_json(value).errorCode).toBe(0);
         }
     });
 
     it('should return an error code if invalid', () => {
-        for(const value of ['', 'TRUE', '...']) {
+        for(const value of ['', 'TRUE', '...', '12a']) {
             expect(bash_json(value).errorCode).not.toBe(0);
         }
     });
