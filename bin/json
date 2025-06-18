@@ -6,7 +6,11 @@ declare -F json >/dev/null || {
     declare -rgx JSON_CONFIG_COMMENTS="${JSON_CONFIG_COMMENTS:-}"
 
     json() {
-        : todo
+        local w="$*"
+        case "$w" in
+            null|false|true) return 0;;
+            *) return 1;;
+        esac
     }
 
     [ "$0" == "${BASH_SOURCE[0]}" ] && json "$@"
