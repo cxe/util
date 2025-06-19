@@ -5,7 +5,21 @@ declare -F json >/dev/null || {
     declare -gx JSON_CONFIG_FILEEXT=(.json .jsonld .jsonc .json5 .ndjson .jsonl .har)
     declare -gx JSON_CONFIG_COMMENTS="${JSON_CONFIG_COMMENTS:-}"
 
+    json_help(){
+        echo "
+            Options:
+            --help (show this help text)
+            --type (print type of passed JSON value)
+        "
+    }
+
     json() {
+        case $1 in
+            --help) json_help; return;;
+            --type) trap 'echo $t' RETURN; shift;;
+            # todo: --quiet)
+        esac
+
         declare s="$*" c w t
         declare -i k=0 i=0 n=${#s}
 
@@ -21,6 +35,14 @@ declare -F json >/dev/null || {
                         esac
                     done
                     ;;
+                \"|\')
+                    t=string
+                    while (( ++i < n )); do
+                        case "${s:i:1}" in
+                            "$c") break;;
+                        esac
+                    done
+                    ;;
                 [0-9])
                     t=number
                     while (( i < n )); do
@@ -31,24 +53,31 @@ declare -F json >/dev/null || {
                     done
                     ;;
                 [a-zA-Z_])
+                    t=""
                     while (( i < n )); do
                         case "${s:i:1}" in
                             [a-zA-Z0-9_]) ((i++));;
                             *) break;;
                         esac
                     done
-                    w="${s:k:i-k}"
-                    case "$w" in
-                        null) t=null;;
-                        true|false) t=bool;;
-                        *) t="";;
-                    esac
+                    ;;
+                *)
+                    t=""
                     ;;
             esac
             w="${s:k:i-k}"
+            if [ "$t" = "" ]; then
+                case "$w" in
+                    null) t=null;;
+                    true|false) t=boolean;;
+                esac
+            fi
             #echo "'$w' '$t'"
         done
-        [ "$t" ] && return 0 || return 1
+        [ "$t" ] && return 0
+
+        echo -e "\e[31minvalid JSON\e[0m" >&2
+        return 1
     }
 
     [ "$0" == "${BASH_SOURCE[0]}" ] && json "$@"
