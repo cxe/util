@@ -43,7 +43,10 @@ declare -F json >/dev/null || {
                         esac
                     done
                     ;;
-                [0-9])
+                -|[0-9])
+                    case "${s:k:2}" in
+                        -[0-9]) ((i++));;
+                    esac
                     t=number
                     while (( i < n )); do
                         case "${s:i:1}" in
@@ -72,7 +75,7 @@ declare -F json >/dev/null || {
                     true|false) t=boolean;;
                 esac
             fi
-            #echo "'$w' '$t'"
+            //echo "'$w' '$t'"
         done
         [ "$t" ] && return 0
 
