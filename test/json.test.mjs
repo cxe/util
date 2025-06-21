@@ -4,7 +4,7 @@ import { bash } from "../bash.mjs";
 const bash_json = args => bash(`./bin/json ${args}`);
 const bash_json_var = v => bash(`. "$PWD/bin/json"; test -v ${v} && echo "\$${v}" || echo undefined`).output;
 
-const VALID = ['null', 'true', 'false', 0, 42, -2, Number.MAX_SAFE_INTEGER]; // todo: '""'  '{"foo":"bar"}','{}', ' { } ', '\n{\n}\n', '\t{\t}\t']
+const VALID = ['null', 'true', 'false', 0, 42, -2, 0.1, 123.456, 1e10, 1E+10, -3.14e-2, -123.456, Number.MAX_SAFE_INTEGER]; // todo: '""'  '{"foo":"bar"}','{}', ' { } ', '\n{\n}\n', '\t{\t}\t']
 const INVALID = ['', ' ', '0o', 'TRUE', '...'];
 
 describe("bash", () => {

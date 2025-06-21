@@ -26,7 +26,7 @@ declare -F json >/dev/null || {
         while (( k=i, ++i <= n )); do
             c="${s:k:1}"
             case "$c" in
-                '\n'|'\r'|'\t'|' ')
+                '\n'|'\r'|'\t'|' ')  # Handle whitespace
                     t=space
                     while (( i < n )); do
                         case "${s:i:1}" in
@@ -35,7 +35,7 @@ declare -F json >/dev/null || {
                         esac
                     done
                     ;;
-                \"|\')
+                \"|\')  # Handle strings
                     t=string
                     while (( ++i < n )); do
                         case "${s:i:1}" in
@@ -43,19 +43,39 @@ declare -F json >/dev/null || {
                         esac
                     done
                     ;;
-                -|[0-9])
-                    case "${s:k:2}" in
-                        -[0-9]) ((i++));;
-                    esac
-                    t=number
+                -|[0-9])  # Handle numbers (integers, fractions, exponents)
+                    t="number"
+                    if [[ "${s:k:2}" == -[0-9]* ]]; then
+                        ((i++))
+                    fi
                     while (( i < n )); do
                         case "${s:i:1}" in
                             [0-9]) ((i++));;
-                            *) break;;
+                            .)
+                                if [[ "${s:i:2}" == .[0-9] ]]; then
+                                    ((i++))
+                                    while (( i < n )) && [[ "${s:i:1}" = [0-9] ]]; do
+                                        ((i++))
+                                    done
+                                fi
+                                ;;
+                            [eE])
+                                if (( i + 1 < n )) && [[ "${s:i+1:1}" =~ [+-] ]]; then
+                                    ((i++))
+                                fi
+                                if (( i < n )) && [[ "${s:i:1}" = [0-9] ]]; then
+                                    while (( i < n )) && [[ "${s:i:1}" =~ [0-9] ]]; do
+                                        ((i++))
+                                    done
+                                fi
+                                ;;
+                            *)
+                                break
+                                ;;
                         esac
                     done
                     ;;
-                [a-zA-Z_])
+                [a-zA-Z_])  # Handle keywords like null, true, false
                     t=""
                     while (( i < n )); do
                         case "${s:i:1}" in
@@ -63,6 +83,11 @@ declare -F json >/dev/null || {
                             *) break;;
                         esac
                     done
+                    w="${s:k:i-k}"
+                    case "$w" in
+                        null) t=null ;;
+                        true|false) t=boolean ;;
+                    esac
                     ;;
                 *)
                     t=""
@@ -75,7 +100,6 @@ declare -F json >/dev/null || {
                     true|false) t=boolean;;
                 esac
             fi
-            //echo "'$w' '$t'"
         done
         [ "$t" ] && return 0
 
