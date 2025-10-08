@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 declare -F util >/dev/null || {
+    set -euo pipefail
+    export IFS=$'\n\t'
+
     UTIL_VERSION=0.4.0
     UTIL_PATH="$( cd -- "${BASH_SOURCE[0]%/*}/.." && pwd )"
 

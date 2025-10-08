@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-shopt -s extglob
+source "${BASH_SOURCE%/*}/util"
 
 # @usage: is <kind> <value>
 # Beispiel:
@@ -7,7 +7,8 @@ shopt -s extglob
 #   is truthy "$x"         && echo "$_ is truthy"
 #   is array myArr         && echo "is an indexed arraz"
 #   is function myFunc     && echo "is a shell function"
-declare -F is >/dev/null || { set -x
+declare -F is >/dev/null || {
+
     is() {
         local error=()
         if [ $# == 1 ]; then

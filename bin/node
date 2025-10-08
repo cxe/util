@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source "${BASH_SOURCE%/*}/util"
 
 declare -F node >/dev/null || {
     export NODE_BIN="${NODE_BIN:-$( which node 2>/dev/null )}"
