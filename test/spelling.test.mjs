@@ -1,45 +1,45 @@
-import { natoEncode, natoDecode } from '../spelling.mjs';
+import { icaoEncode, icaoDecode } from '../spelling.mjs';
 
-describe('NATO Phonetic Encoder/Decoder', () => {
+describe('ICAO Phonetic Encoder/Decoder', () => {
 
   test('encodes simple uppercase text', () => {
-    expect(natoEncode('HELLO')).toBe('HOTEL ECHO LIMA LIMA OSCAR');
+    expect(icaoEncode('HELLO')).toBe('HOTEL ECHO LIMA LIMA OSCAR');
   });
 
   test('encodes lowercase with case preservation', () => {
-    expect(natoEncode('hello')).toBe('Hotel Echo Lima Lima Oscar');
+    expect(icaoEncode('hello')).toBe('Hotel Echo Lima Lima Oscar');
   });
 
   test('encodes digits and punctuation', () => {
-    expect(natoEncode('Test 123!')).toBe(
+    expect(icaoEncode('Test 123!')).toBe(
       'TANGO Echo Sierra Tango Space One Two Three Exclamation Mark'
     );
   });
 
   test('decodes simple phrase', () => {
     expect(
-      natoDecode('HOTEL ECHO LIMA LIMA OSCAR')
+      icaoDecode('HOTEL ECHO LIMA LIMA OSCAR')
     ).toBe('HELLO');
   });
 
   test('round-trip encoding/decoding', () => {
     const text = 'Hello, World! 123';
-    const encoded = natoEncode(text);
-    const decoded = natoDecode(encoded);
+    const encoded = icaoEncode(text);
+    const decoded = icaoDecode(encoded);
     expect(decoded).toBe(text.toUpperCase());
   });
 
   test('supports speech mode', () => {
-    const encoded = natoEncode('Hi', { speech: true });
+    const encoded = icaoEncode('Hi', { speech: true });
     expect(encoded).toMatch(/<break time='200ms'\/>/);
   });
 
   test('supports custom separator', () => {
-    const encoded = natoEncode('OK', { separator: ' / ' });
+    const encoded = icaoEncode('OK', { separator: ' / ' });
     expect(encoded).toBe('OSCAR / KILO');
   });
 
   test('ignores unknown characters', () => {
-    expect(natoEncode('©')).toBe('©');
+    expect(icaoEncode('©')).toBe('©');
   });
 });
