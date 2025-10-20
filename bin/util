@@ -47,6 +47,12 @@ declare -F util >/dev/null || {
         : # todo
     }
 
+	on_exit() {
+		local new_handler="$1" existing_handler
+		existing_handler="$( trap -p EXIT | sed "s/.*'\(.*\)'.*/\1/" )"
+		trap "${existing_handler:+$existing_handler; }$new_handler" EXIT
+	}
+
     declare -rx UTIL_PATH UTIL_VERSION
     declare -x UTIL_VAR
 
