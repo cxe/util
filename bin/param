@@ -1,9 +1,34 @@
 #!/usr/bin/env bash
+set +x -euo pipefail
 
-declare -F param >/dev/null || {
-    param() {
-        : todo
-    }
+##
+# @usage `declare -a args=(); declare -A opts=(); param "$@"`
+# @param input (mixed opts and args)
+##
+param() {
+  declare -n _arg=args _opt=opts
+  declare -i i=1 k=0 n=$#
+  declare restore=":"
 
-    [ "$0" == "${BASH_SOURCE[0]}" ] && param "$@"
+  args=()
+  [[ "$-" = *u* ]] && restore="set -u" && set +u
+  for ((i=1; i<=n; i++)); do
+    arg="${!i}"
+    case "$arg" in
+      --) for ((k=i+1; k<=n; k++)); do _arg+=("${!k}"); done; break ;;
+      --*=*) key="${arg%%=*}"; val="${arg#*=}"; _opt["${key#--}"]="$val" ;;
+      --*)   key="${arg:2}"; _opt["$key"]=1 ;;
+      -?=*)  key="${arg:1:1}"; val="${arg#*=}"; _opt["$key"]="$val" ;;
+      -[!-]*)
+        for ((j=1; j<${#arg}; j++)); do
+          _opt["${arg:j:1}"]=1
+        done ;;
+      -?) _opt["${arg:1:1}"]=1 ;;
+      *) _arg+=("$arg") ;;
+    esac
+  done
+
+  $restore
 }
+
+return 2>/dev/null || param "$@"
