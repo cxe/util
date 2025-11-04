@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set +x -euo pipefail
+
+##
+# curl wrapper adding verbose call logging and caching
+##
+declare CURL_VERBOSE=${CURL_VERBOSE:-1}
+declare -i CURL_CACHE_MAXAGE_SECONDS=${CURL_CACHE_MAXAGE_SECONDS:-3600}
+
+[ "${CURL_BIN:-}" ] && return 2>/dev/null
+declare CURL_BIN; CURL_BIN="$(PATH="/usr/bin:/bin:/mingw64/bin" type -P curl 2>/dev/null || echo /usr/bin/curl)"
+declare CURL_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/curl"
+
+curl() {
+  local url file now strategy=""
+
+  if [[ "${1:-}" == --cache* ]]; then
+    shift
+    strategy="caching"
+
+    # detect first URL-like argument
+    for arg in "$@"; do
+      [[ "$arg" = *"://"* ]] && { url="$arg"; break; }
+    done
+
+    if [[ -n "$url" ]]; then
+      now=$(date +%s)
+      mkdir -p "$CURL_CACHE_DIR"
+
+      # hash all args (after removing --use-cache)
+      file="$CURL_CACHE_DIR/$(printf '%s\0' "$@" | md5sum | cut -d' ' -f1)"
+
+      if [[ -f "$file" ]]; then
+        local age=$(( now - $(stat -c %Y "$file") ))
+        if (( age < CURL_CACHE_MAXAGE_SECONDS )); then
+          strategy="cached"
+        else
+          rm -f "$file"
+        fi
+      fi
+
+      if [ "$strategy" != cached ]; then
+        "$CURL_BIN" "$@" >"$file"
+      fi
+    fi
+  fi
+
+  if [ "$strategy" ]; then
+      ((CURL_VERBOSE)) && echo -e "\e[36;2mcurl $* \e[37;2m($strategy)\e[0m" >&2
+      cat "$file"
+  else
+      ((CURL_VERBOSE)) && echo -e "\e[36;2mcurl $*\e[0m" >&2
+      "$CURL_BIN" "$@"
+  fi
+}
+
+return 2>/dev/null || curl "$@"
